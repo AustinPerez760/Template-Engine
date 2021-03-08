@@ -10,26 +10,177 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const allEmployees = [];
+const idArray = [];
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
+function addMembers(answers) {
+  return inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "name",
+        message: "Please enter an employee's name?",
+        validate: (answer) => {
+          if (answer === "") {
+            return "Please enter a valid name.";
+          } else {
+            return true;
+          }
+        },
+      },
+      {
+        type: "input",
+        name: "id",
+        message: "Please enter the employee's ID number?",
+        validate: (answer) => {
+          if (idArray.includes(answer)) {
+            return "ID is in use enter a different number.";
+          } else if (answer === "") {
+            return "Please enter a valid ID.";
+          } else {
+            return true;
+          }
+        },
+      },
+      {
+        type: "text",
+        name: "email",
+        message: "Please enter an employee's email address?",
+        validate: (answer) => {
+          if (answer === "") {
+            return "Please enter a valid email.";
+          } else {
+            return true;
+          }
+        },
+      },
+      {
+        type: "list",
+        name: "position",
+        message: "Please enter the position of the employee?",
+        choices: ["Manager", "Engineer", "Intern"],
+      },
+    ])
+    .then((response) => {
+      switch (response.position) {
+        case "Manager":
+          inquirer
+            .prompt([
+              {
+                type: "input",
+                name: "officeNumber",
+                message: "What is the manager office number?",
+                validate: (answer) => {
+                  if (answer === "") {
+                    return "enter the valid office number.";
+                  } else {
+                    return true;
+                  }
+                },
+              },
+            ])
+            .then((res) => {
+              let newMember = new Manager(
+                response.name,
+                response.id,
+                response.email,
+                res.officeNumber,
+                response.position
+              );
+              // console.log(newMember);
+              allEmployees.push(newMember);
+              idArray.push(response.id);
+              addMoreMembers();
+            });
+          break;
+        case "Engineer":
+          inquirer
+            .prompt([
+              {
+                type: "input",
+                name: "github",
+                message: "Enter their GitHub username?",
+                validate: (answer) => {
+                  if (answer === "") {
+                    return "Please enter a valid GitHub username.";
+                  } else {
+                    return true;
+                  }
+                },
+              },
+            ])
+            .then((res) => {
+              let newMember = new Engineer(
+                response.name,
+                response.id,
+                response.email,
+                res.github,
+                response.position
+              );
+              // console.log(newMember);
+              allEmployees.push(newMember);
+              idArray.push(response.id);
+              addMoreMembers();
+            });
+          break;
+        case "Intern":
+          inquirer
+            .prompt([
+              {
+                type: "input",
+                name: "school",
+                message: "What school do they attend?",
+                validate: (answer) => {
+                  if (answer === "") {
+                    return "Please enter a valid school name.";
+                  } else {
+                    return true;
+                  }
+                },
+              },
+            ])
+            .then((res) => {
+              let newMember = new Intern(
+                response.name,
+                response.id,
+                response.email,
+                res.school,
+                response.position
+              );
+              // console.log(newMember);
+              allEmployees.push(newMember);
+              idArray.push(response.id);
+              addMoreMembers();
+            });
+          break;
+      }
+    });
+}
 
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
+function addMoreMembers() {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "addMore",
+        message: "Would you like to add more employees?",
+        choices: ["Yes", "No"],
+      },
+    ])
+    .then((response) => {
+      if (response.addMore === "Yes") {
+        addMembers();
+      } else if (response.addMore === "No") {
+        let renderedEmployees = render(allEmployees);
+        fs.writeFile(outputPath, renderedEmployees, (err) =>
+          err
+            ? console.error(err)
+            : console.log(
+                'team.html file created! Check the "output/" folder for the finished html!'
+              )
+        );
+      }
+    });
+}
 
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+addMembers();
