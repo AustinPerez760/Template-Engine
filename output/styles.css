@@ -1,0 +1,17 @@
+body {
+  background-color: rgb(178, 193, 198);
+}
+
+.jumbotron {
+  background-color: rgb(52, 100, 116);
+  color: rgb(16, 68, 92);
+}
+
+.employee-card {
+  background-color: rgb(244, 188, 124);
+  color: rgb(16, 68, 92);
+}
+.list-group-item {
+  background-color: rgb(178, 193, 198);
+  color: rgb(16, 68, 92);
+}
